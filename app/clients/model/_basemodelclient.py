@@ -16,8 +16,6 @@ from coredis import ConnectionPool, Redis
 from fastapi import HTTPException
 import httpx
 
-from uuid import uuid4
-
 from app.helpers.models import WorkingContext
 from app.schemas.core.configuration import ModelProviderType, ModelProvider as ModelClientSchema
 from app.utils.configuration import configuration
@@ -86,7 +84,7 @@ class BaseModelClient(ABC):
 
         self._context_register = {}  # One per client to avoid competition between threads
         self._context_lock = asyncio.Lock()
-        self.queue_name = str(uuid4())
+        self.queue_name = f"model_{self.name}"  # Maybe use type + name for more explicit logs.
 
         self.queue = None
         self.shutdown_future = asyncio.Future()

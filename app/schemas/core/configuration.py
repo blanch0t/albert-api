@@ -319,6 +319,8 @@ class RedisDependency(ConfigBaseModel):
 class RabbitMQDependency(ConfigBaseModel):
     host: Optional[str] = Field(default="localhost", description="RabbitMQ host.")
     port: Optional[int] = Field(default=5672, description="Port RabbitMQ listens to.")
+    user: Optional[str] = Field(default="master", description="RabbitMQ default user.")
+    password: Optional[str] = Field(default="changeme", description="RabbitMQ password.")
     sender_pool_size: Optional[int] = Field(default=100, description="How many AMQP channel the pool used by 'sender' contains.")
     timeout: Optional[float] = Field(default=20.0, description="How long should a result be waited, before considering the request to be expired.")
 

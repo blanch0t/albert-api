@@ -5,7 +5,6 @@ from itertools import cycle
 import time
 from typing import Callable, Union, Awaitable, TYPE_CHECKING
 import inspect
-from uuid import uuid4
 
 import aio_pika
 from aio_pika import IncomingMessage
@@ -75,7 +74,7 @@ class BaseModelRouter(ABC):
 
         self.queue = None
         self.shutdown_future = asyncio.Future()
-        self.queue_name = str(uuid4())  # Maybe use type + name for more explicit logs.
+        self.queue_name = f"router_{self.name}_{self.type.value}"  # Maybe use type + name for more explicit logs.
 
         if configuration.dependencies.rabbitmq:
             self._dispatch_task = AsyncRabbitMQConnection().consumer_loop.create_task(self._dispatch_callback())

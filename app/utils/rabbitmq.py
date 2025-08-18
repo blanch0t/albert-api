@@ -42,8 +42,8 @@ class AsyncRabbitMQConnection:
         self.connection = await aio_pika.connect_robust(
             host=rmq_config.host,
             port=rmq_config.port,
-            login=configuration.settings.auth_master_username,
-            password=configuration.settings.auth_master_key,
+            login=rmq_config.user,
+            password=rmq_config.password
         )
 
         self.sender_loop = asyncio.get_running_loop()  # FastAPI event loop
