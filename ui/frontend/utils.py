@@ -47,7 +47,9 @@ def resources_selector(resource: Literal["collection", "role", "user", "document
         with col2:
             order_direction = st.selectbox(label="Order direction", options=["asc", "desc"], index=0, key=f"order_direction-{resource}")
 
-        resources = get_users(offset=st.session_state.get(key, 0), limit=per_page, role=resource_filter, order_by=order_by, order_direction=order_direction)
+        resources = get_users(
+            offset=st.session_state.get(key, 0), limit=per_page, role=resource_filter, order_by=order_by, order_direction=order_direction
+        )
         new_resource = {"name": None, "access_ui": False, "expires_at": None, "id": None, "role": None}
 
         data = pd.DataFrame(
@@ -222,69 +224,9 @@ def input_new_role_permissions(selected_role: dict):
         col1, col2, col3 = st.columns(spec=3)
         new_role_permissions = []
         with col1:
-            st.caption("Roles")
-            if st.checkbox(
-                label="Create role",
-                key="create_role_checkbox",
-                value="create_role" in selected_role.get("permissions", []),
-                disabled=disabled,
-            ):
-                new_role_permissions.append("create_role")
-            if st.checkbox(
-                label="Read role",
-                key="read_role_checkbox",
-                value="read_role" in selected_role.get("permissions", []),
-                disabled=disabled,
-            ):
-                new_role_permissions.append("read_role")
-            if st.checkbox(
-                label="Delete role",
-                key="delete_role_checkbox",
-                value="delete_role" in selected_role.get("permissions", []),
-                disabled=disabled,
-            ):
-                new_role_permissions.append("delete_role")
-            if st.checkbox(
-                label="Update role",
-                key="update_role_checkbox",
-                value="update_role" in selected_role.get("permissions", []),
-                disabled=disabled,
-            ):
-                new_role_permissions.append("update_role")
-
+            if st.checkbox(label="Admin", key="admin_checkbox", value="admin" in selected_role.get("permissions", []), disabled=disabled):
+                new_role_permissions.append("admin")
         with col2:
-            st.caption("Users")
-            if st.checkbox(
-                label="Create user",
-                key="create_user_checkbox",
-                value="create_user" in selected_role.get("permissions", []),
-                disabled=disabled,
-            ):
-                new_role_permissions.append("create_user")
-            if st.checkbox(
-                label="Read user",
-                key="read_user_checkbox",
-                value="read_user" in selected_role.get("permissions", []),
-                disabled=disabled,
-            ):
-                new_role_permissions.append("read_user")
-            if st.checkbox(
-                label="Delete user",
-                key="delete_user_checkbox",
-                value="delete_user" in selected_role.get("permissions", []),
-                disabled=disabled,
-            ):
-                new_role_permissions.append("delete_user")
-            if st.checkbox(
-                label="Update user",
-                key="update_user_checkbox",
-                value="update_user" in selected_role.get("permissions", []),
-                disabled=disabled,
-            ):
-                new_role_permissions.append("update_user")
-
-        with col3:
-            st.caption("Others")
             if st.checkbox(
                 label="Read metric",
                 key="read_metric_checkbox",
@@ -292,6 +234,7 @@ def input_new_role_permissions(selected_role: dict):
                 disabled=disabled,
             ):
                 new_role_permissions.append("read_metric")
+        with col3:
             create_public_collection = st.checkbox(
                 label="Create public collection",
                 key="create_public_collection_checkbox",
@@ -333,10 +276,10 @@ def input_new_role_limits(selected_role: dict):
             disabled=True if disabled else ["_index"],
             column_config={
                 "_index": st.column_config.ListColumn(label="", width="medium"),
-                "Request per minute": st.column_config.NumberColumn(label="Request per minute", min_value=0, step=1, required=False, width="small"),
-                "Request per day": st.column_config.NumberColumn(label="Request per day", min_value=0, step=1, required=False, width="small"),
-                "Tokens per minute": st.column_config.NumberColumn(label="Tokens per minute", min_value=0, step=1, required=False, width="small"),
-                "Tokens per day": st.column_config.NumberColumn(label="Tokens per day", min_value=0, step=1, required=False, width="small"),
+                "Request per minute": st.column_config.NumberColumn(label="Request per minute", min_value=0, step=1, width="small"),
+                "Request per day": st.column_config.NumberColumn(label="Request per day", min_value=0, step=1, width="small"),
+                "Tokens per minute": st.column_config.NumberColumn(label="Tokens per minute", min_value=0, step=1, width="small"),
+                "Tokens per day": st.column_config.NumberColumn(label="Tokens per day", min_value=0, step=1, width="small"),
             },
             height=28 * len(models) + 37,
             row_height=28,
