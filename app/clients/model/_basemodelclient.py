@@ -8,7 +8,7 @@ import logging
 import re
 import time
 import traceback
-from typing import Any, Dict, Optional, Tuple, Type
+from typing import Any, Dict, Literal, Optional, Tuple, Type, List
 from urllib.parse import urljoin
 
 from aio_pika import IncomingMessage
@@ -396,13 +396,36 @@ class BaseModelClient(ABC):
         except Exception as e:
             logger.error(f"Failed to log request metrics in redis ts {latency_ts_key}: {e}", exc_info=True)
 
+
+    async def get_timeseries_since(
+        self, 
+        metric_type: Literal["time_to_first_token", "latency"], 
+        cutoff: Optional[datetime] = None
+    ) -> List[Tuple[int, float]]:
+        """
+        Fetch all points in the RedisTimeSeries key newer than `cutoff`.
+
+        Returns a list of (timestamp_ms, value) tuples.
+        """
+        key = f"metrics_ts:{metric_type}:{self.name}:{self.url}"
+        try:
+            from_ts = int(cutoff.timestamp() * 1000) if cutoff else 0
+            to_ts = '+'
+
+            result = await self.redis.timeseries.range(key, from_ts, to_ts)
+            return [(ts, val) for ts, val in result]
+        except Exception as e:
+            logger.error(f"Failed to fetch timeseries for {key}: {e}", exc_info=True)
+            await self.redis.reset()
+            return []
+
     async def forward_request(
         self,
         method: str,
         json: Optional[dict] = None,
         files: Optional[dict] = None,
         data: Optional[dict] = None,
-        additional_data: Dict[str, Any] = None,
+        additional_data: Dict[str, Any] | None = None,
     ) -> httpx.Response:
         """
         Forward a request to a client model and add model name to the response. Optionally, add additional data to the response.

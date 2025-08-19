@@ -13,7 +13,7 @@ class BaseRoutingStrategy(ABC):
         self.clients = clients
 
     @abstractmethod
-    def choose_model_client(self) -> "BaseModelClient":
+    async def choose_model_client(self) -> tuple["BaseModelClient", float | None]:
         """
         Choose a client among the model's clients list
 

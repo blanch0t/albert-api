@@ -4,6 +4,7 @@ from fastapi import HTTPException
 from itertools import cycle
 import time
 from typing import Callable, Union, Awaitable, TYPE_CHECKING
+from datetime import datetime, timedelta
 import inspect
 
 import aio_pika
@@ -109,7 +110,7 @@ class BaseModelRouter(ABC):
                 return
 
             async with self._lock:
-                client = self.get_client(ctx.endpoint)
+                client = await self.get_client(ctx.endpoint)
                 await client.register_context(ctx)
 
                 await AsyncRabbitMQConnection().publish_default_exchange(
@@ -152,7 +153,7 @@ class BaseModelRouter(ABC):
         )
 
     @abstractmethod
-    def get_client(self, endpoint: str) -> "BaseModelClient":
+    async def get_client(self, endpoint: str) -> "BaseModelClient":
         """
         Get a client to handle the request.
         NB: this method is not thread-safe, you probably want to use safe_client_access.
@@ -325,7 +326,7 @@ class BaseModelRouter(ABC):
         Unattended disconnections may still happen (the function may raise an HTTPException).
         """
         async with self._lock:
-            client = self.get_client(endpoint)
+            client = await self.get_client(endpoint)
             # Client lock is acquired within this block to prevent
             # another thread to remove it while in use
             await client.lock.acquire()

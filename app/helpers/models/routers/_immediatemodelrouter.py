@@ -30,7 +30,7 @@ class ImmediateModelRouter(BaseModelRouter):
     ) -> None:
         super().__init__(id, type, owned_by, aliases, routing_strategy, clients, *args, **kwargs)
 
-    def get_client(self, endpoint: str) -> ModelClient:
+    async def get_client(self, endpoint: str) -> ModelClient:
         if endpoint and self.type not in self.ENDPOINT_MODEL_TYPE_TABLE[endpoint]:
             raise WrongModelTypeException()
 

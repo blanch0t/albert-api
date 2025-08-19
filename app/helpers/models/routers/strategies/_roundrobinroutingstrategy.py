@@ -1,4 +1,4 @@
-from typing import Iterator, List, TYPE_CHECKING
+from typing import Iterator, List, TYPE_CHECKING, Tuple
 
 from app.helpers.models.routers.strategies import BaseRoutingStrategy
 
@@ -14,5 +14,5 @@ class RoundRobinRoutingStrategy(BaseRoutingStrategy):
         super().__init__(clients)
         self.cycle = cycle
 
-    def choose_model_client(self) -> "BaseModelClient":
-        return next(self.cycle)
+    async def choose_model_client(self) -> Tuple["BaseModelClient", float | None]:
+        return next(self.cycle), None

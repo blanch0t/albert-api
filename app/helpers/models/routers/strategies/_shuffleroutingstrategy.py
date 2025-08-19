@@ -1,5 +1,5 @@
 import random
-from typing import List, TYPE_CHECKING
+from typing import List, TYPE_CHECKING, Tuple
 
 from app.helpers.models.routers.strategies import BaseRoutingStrategy
 
@@ -14,5 +14,5 @@ class ShuffleRoutingStrategy(BaseRoutingStrategy):
     def __init__(self, clients: List["BaseModelClient"]) -> None:
         super().__init__(clients)
 
-    def choose_model_client(self) -> "BaseModelClient":
-        return random.choice(self.clients)
+    async def choose_model_client(self) -> Tuple["BaseModelClient", float | None]:
+        return random.choice(self.clients), None

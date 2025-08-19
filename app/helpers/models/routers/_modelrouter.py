@@ -1,4 +1,4 @@
-from app.helpers.models.routers.strategies import RoundRobinRoutingStrategy, ShuffleRoutingStrategy
+from app.helpers.models.routers.strategies import RoundRobinRoutingStrategy, ShuffleRoutingStrategy, LeastBusyRoutingStrategy
 from app.schemas.core.configuration import RoutingStrategy
 from app.schemas.models import ModelType
 from app.utils.exceptions import WrongModelTypeException
@@ -36,16 +36,18 @@ class ModelRouter(BaseModelRouter):
     ) -> None:
         super().__init__(name=name, type=type, owned_by=owned_by, aliases=aliases, routing_strategy=routing_strategy, providers=providers)
 
-    def get_client(self, endpoint: str) -> "BaseModelClient":
+    async def get_client(self, endpoint: str) -> "BaseModelClient":
         if endpoint and self.type not in self.ENDPOINT_MODEL_TYPE_TABLE[endpoint]:
             raise WrongModelTypeException()
 
         if self.routing_strategy == RoutingStrategy.ROUND_ROBIN:
             strategy = RoundRobinRoutingStrategy(self._providers, self._cycle)
+        elif self.routing_strategy == RoutingStrategy.LEAST_BUSY:
+            strategy = LeastBusyRoutingStrategy(self._providers, "time_to_first_token")
         else:  # ROUTER_STRATEGY__SHUFFLE
             strategy = ShuffleRoutingStrategy(self._providers)
 
-        client = strategy.choose_model_client()
+        client, metric = await strategy.choose_model_client()
         client.endpoint = endpoint
 
         return client
